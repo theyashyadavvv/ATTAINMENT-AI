@@ -1,0 +1,33 @@
+// Function to extract questions from the Excel file
+void extractQuestions(String filePath) async {
+  try {
+    var file = File(filePath);
+    var bytes = file.readAsBytesSync();
+    
+    // Try decoding the Excel file
+    var excel = Excel.decodeBytes(bytes);
+
+    questions.clear(); // Clear any existing questions
+
+    // Iterate over sheets and rows to extract questions
+    for (var table in excel.tables.keys) {
+      var sheet = excel.tables[table]!;
+      for (var row in sheet.rows) {
+        String? question = row[0]?.value?.toString(); // Assuming questions are in the first column
+        if (question != null && question.isNotEmpty) {
+          questions.add(question);
+        }
+      }
+    }
+
+    setState(() {
+      pickedFileName = 'File loaded with ${questions.length} questions';
+    });
+
+  } catch (e) {
+    print("Error reading Excel file: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error reading Excel file. Please ensure it is a valid .xls or .xlsx file.')),
+    );
+  }
+}
